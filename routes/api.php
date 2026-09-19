@@ -1,9 +1,10 @@
 <?php
 
+use App\Models\Blog;
+use App\Models\Buku;
+use App\Models\Ticketing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Blog;
-use App\Models\Ticketing;
 
 // // fungsi untuk mendapatkan user, but need authentikasi
 Route::get('/user', function (Request $request) {
@@ -20,137 +21,217 @@ Route::get('/user', function (Request $request) {
 // A = ADD (menambahkan data)
 // D = DELETE (menghapus data)
 
-
-Route::get('/hello-world',function() {
-    $name = request()->get('name')?? 'Antoni';
+Route::get('/hello-world', function () {
+    $name = request()->get('name') ?? 'Antoni';
 
     return response()->json([
-        'message' => "Hello World, {$name}"
+        'message' => "Hello World, {$name}",
     ]);
 });
 
 
 // blogs: untuk menampilkan semua data blogs (GET)
 // B (Browse): MENAMPILKAN LIST DARIPADA BLOG YANG ADA DI DATABASE
-Route::get('/blogs', function() {
-    $blogs=Blog::get();
+Route::get('/blogs', function () {
+    $blogs = Blog::get();
 
-
-    return  response()->json([
-        'data' => $blogs
+    return response()->json([
+        'data' => $blogs,
     ]);
 });
 
 // blogs/{id}: untuk menampilkan data blog berdasarkan id (GET)
 // R (Read): MENAMPILKAN DETAIL DATA BLOG BERDASARKAN ID
-Route::get('/blog/{id}', function($id){
+Route::get('/blog/{id}', function ($id) {
     $blog = Blog::findOrFail($id);
 
     return response()->json([
-        'message' => "Data Blog Berhasil di tampilkan",
+        'message' => 'Data Blog Berhasil di tampilkan',
         'data' => $blog,
     ]);
 });
 
 // blogs/{id}: untuk mengupdate data blog berdasarkan id (PUT)
 // E (Edit): MENGUPDATE DATA BLOG BERDASARKAN ID
-Route::put('/blog/{id}', function($id){
+Route::put('/blog/{id}', function ($id) {
     $blog = Blog::findOrFail($id);
     $blog->update([
         'title' => request()->input('title'),
-        'content' => request()->input('content')
+        'content' => request()->input('content'),
     ]);
 
     return response()->json([
-        'message' => "Data Blog Berhasil di update",
+        'message' => 'Data Blog Berhasil di update',
     ]);
 });
 
 // blogs: untuk menambahkan data baru (POST)
 // A (Add): MENAMBAHKAN DATA BLOG YANG ADA DI DATABASE
-Route::post('/blogs', function(){
-    $blogs=Blog::create([
-    'title' => request()->input('satu'), 
-    'content' => request()->input('Lorem Ipsum Blablabla'),
+Route::post('/blogs', function () {
+    $blogs = Blog::create([
+        'title' => request()->input('satu'),
+        'content' => request()->input('Lorem Ipsum Blablabla'),
     ]);
-    
+
     return response()->json([
-        'message' => "Data Berhasil di tambahkan",
+        'message' => 'Data Berhasil di tambahkan',
         'data' => $blogs,
     ]);
 });
 
 // blogs/{id}: untuk menghapus data blog berdasarkan id (DELETE)
 // D (Delete): MENGHAPUS DATA BLOG BERDASARKAN ID
-Route::delete('/blog/{id}', function($id){
+Route::delete('/blog/{id}', function ($id) {
     $blog = Blog::findOrFail($id);
     $blog->delete();
 
     return response()->json([
-        'message' => "Data Blog Berhasil di hapus",
+        'message' => 'Data Blog Berhasil di hapus',
     ]);
 });
 
-
-
-
-//ticketing
-Route::get('/ticketing', function(){
+// ticketing
+Route::get('/ticketing', function () {
     $ticketing = Ticketing::get();
+
     return response()->json([
-        'message' => $ticketing->isEmpty() ? "Data Tiket Tidak Ada" : "Data Tiket Ada",
-        'data' => $ticketing
+        'message' => $ticketing->isEmpty() ? 'Data Tiket Tidak Ada' : 'Data Tiket Ada',
+        'data' => $ticketing,
     ]);
 });
 
-Route::get('/ticketing/{id}', function($id){
+Route::get('/ticketing/{id}', function ($id) {
     $ticketing = Ticketing::findOrFail($id);
+
     return response()->json([
-        'message' => "Data Tiket Berhasil di tampilkan",
-        'data' => $ticketing
+        'message' => 'Data Tiket Berhasil di tampilkan',
+        'data' => $ticketing,
     ]);
 });
 
-Route::put('/ticketing/{noAntrian}', function($noAntrian){
+Route::put('/ticketing/{noAntrian}', function ($noAntrian) {
     $noAntrian = Ticketing::findOrFail($noAntrian);
     $noAntrian->update([
         'layanan' => request()->input('layanan'),
     ]);
 
     return response()->json([
-        'message' => "Data Antrian Berhasil di update",
+        'message' => 'Data Antrian Berhasil di update',
+        'data' => $noAntrian,
+    ]);
+});
+Route::patch('/ticketing/{noAntrian}', function ($noAntrian) {
+    $noAntrian = Ticketing::findOrFail($noAntrian);
+    $noAntrian->update([
+        'layanan' => request()->input('layanan'),
+    ]);
+
+    return response()->json([
+        'message' => 'Data Antrian Berhasil di update',
         'data' => $noAntrian,
     ]);
 });
 
-Route::post('/ticketing', function(){
-     $ticketTerakhir = Ticketing::latest('id')->first();
+Route::post('/ticketing', function () {
+    $ticketTerakhir = Ticketing::latest('id')->first();
 
     if ($ticketTerakhir) {
         $nomor = (int) str_replace('INV-', '', $ticketTerakhir->noAntrian) + 1;
     } else {
         $nomor = 1;
     }
-    $noAntrian = 'INV-' . str_pad($nomor, 3, '0', STR_PAD_LEFT);
+    $noAntrian = 'INV-'.str_pad($nomor, 3, '0', STR_PAD_LEFT);
 
     $ticketing = Ticketing::create([
         'noAntrian' => $noAntrian,
-        'layanan' => request()->input('layanan')
+        'layanan' => request()->input('layanan'),
     ]);
 
     return response()->json([
-        'message' => "Data Antrian Berhasil di tambahkan",
-        'data' => [ 
+        'message' => 'Data Antrian Berhasil di tambahkan',
+        'data' => [
             'noAntrian' => $ticketing->noAntrian,
             'layanan' => $ticketing->layanan,
         ],
     ]);
 });
 
-Route::delete('/ticketing/{noAntrian}', function($noAntrian){
+Route::delete('/ticketing/{noAntrian}', function ($noAntrian) {
     $ticketing = Ticketing::findOrFail($noAntrian);
     $ticketing->delete();
+
     return response()->json([
-        'message' => "Data Antrian Berhasil di hapus",
+        'message' => 'Data Antrian Berhasil di hapus',
+    ]);
+});
+
+// Buku Perpustakaan
+Route::get('/buku', function () {
+    $buku = Buku::get();
+
+    return response()->json([
+        'message' => $buku->isEmpty() ? 'Buku Tidak Tersedia' : 'Buku Tersedia',
+        'data' => $buku,
+    ]);
+});
+
+Route::get('/buku/{idBuku}', function ($idBuku) {
+    $buku = Buku::findOrFail($idBuku);
+
+    return response()->json([
+        'message' => 'IdBuku Berhasil Ditemukan',
+        'data' => $buku,
+    ]);
+});
+
+
+Route::post('/buku', function() {
+
+    $bukuTerakhir = Buku::orderBy('idBuku', 'desc')->first();
+
+    if ($bukuTerakhir) {
+        $nomorTerakhir = (int) str_replace('BK', '', $bukuTerakhir->idBuku);
+        $nomor = $nomorTerakhir + 1;
+    } else {
+        $nomor = 1;
+    }
+
+    $idBuku = 'BK' . str_pad($nomor, 3, '0', STR_PAD_LEFT);
+
+    $buku = Buku::create([
+        'idBuku' => $idBuku,
+        'judul' => request()->input('judul'),
+        'authors' => request()->input('authors'),
+        'thnTerbit' => request()->input('thnTerbit'),
+        'stok' => request()->input('stok'),
+    ]);
+
+    return response()->json([
+        'message' => 'Buku Berhasil ditambahkan',
+        'data' => $buku
+    ]);
+});
+
+Route::patch('/buku/{idBuku}', function ($idBuku) {
+    $buku = Buku::findOrFail($idBuku);
+    $buku->update([
+        'stok' => request()->input('stok'),
+    ]);
+
+    return response()->json([
+        'message' => 'Data Buku Berhasil di update',
+        'data' => $buku,
+    ]);
+});
+
+Route::delete('/buku/{idBuku}', function ($idBuku) {
+    $buku = Buku::findOrFail($idBuku);
+    $idBuku = $buku->idBuku;
+    $judul = $buku->judul;
+
+    $buku->delete();
+
+    return response()->json([
+        'message' => "Buku {$idBuku} - {$judul} berhasil dihapus",
     ]);
 });
