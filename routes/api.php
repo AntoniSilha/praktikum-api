@@ -5,11 +5,94 @@ use App\Models\Buku;
 // use App\Models\Ticketing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Blog;
+use App\Http\Controllers\Api\AuthController;
 
 // // fungsi untuk mendapatkan user, but need authentikasi
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:api');
+
+
+Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    
+    Route::get('profile', [AuthController::class, 'profile']);
+    
+    // BREAD
+    // B = BROWSE (menampilkan list data)
+    // R = READ (menampilkan detail data)
+    // E = EDIT (mengubah data)
+    // A = ADD (menambahkan data)
+    // D = DELETE (menghapus data)
+
+
+    // blogs : untuk menampikan semua data blogs (GET)
+    // B (Browse): MENAMPILKAN LISTS DARIPADA BLOG YANG ADA DI DATABASE
+    Route::get('/blogs', function() {
+        $blogs = Blog::get();
+
+        return response()->json([
+            'data' => $blogs
+        ]);
+    });
+
+    // blog/{id} : untuk menampilkan data blog berdasarkan id (GET)
+    // R (Read): MENAMPILKAN DETAIL DATA BLOG BERDASARKAN ID
+    Route::get('/blog/{id}', function($id) {
+        $blog = Blog::findOrFail($id);
+
+        return response()->json([
+            'message' => "Detail blog berhasil ditampilkan",
+            'data' => $blog
+        ]);
+    });
+
+    // blog/{id} : untuk mengupdate data blog berdasarkan id (PUT)
+    // E (Edit): MENGUBAH DATA BLOG BERDASARKAN ID
+    Route::put('/blog/{id}', function($id) {
+        $blog = Blog::findOrFail($id);
+
+        $blog->update([
+            'title' => request()->get('title'),
+            'content' => request()->get('content'),
+        ]);
+
+        return response()->json([
+            'message' => "Blog berhasil diubah",
+        ]);
+    });
+
+
+    // blogs : untuk menambahkan data blog baru (POST)
+    // A (Add): MENAMBAHKAN DATA BLOG BARU KE DALAM DATABASE
+    Route::post('/blogs', function() {
+        $blog = Blog::create([
+            'title' => request()->get('title'),
+            'content' => request()->get('content'),
+        ]);
+
+        return response()->json([
+            'message' => "Blog berhasil ditambahkan",
+            'data' => $blog
+        ]);
+    });
+
+    // blog/{id} : untuk menghapus data blog berdasarkan id (DELETE)
+    // D (Delete): MENGHAPUS DATA BLOG BERDASARKAN ID
+    Route::delete('/blog/{id}', function($id) {
+        $blog = Blog::findOrFail($id);
+
+        $blog->delete();
+
+        return response()->json([
+            'message' => "Blog berhasil dihapus",
+        ]);
+    });
+});
 
 // disini http method get, menampikan hello world
 // dengan parameter name, by default adalah Antoni
@@ -166,75 +249,75 @@ Route::get('/user', function (Request $request) {
 // });
 
 // Buku Perpustakaan
-Route::get('/buku', function () {
-    $buku = Buku::get();
+// Route::get('/buku', function () {
+//     $buku = Buku::get();
 
-    return response()->json([
-        'message' => $buku->isEmpty() ? 'Buku Tidak Tersedia' : 'Buku Tersedia',
-        'data' => $buku,
-    ]);
-});
+//     return response()->json([
+//         'message' => $buku->isEmpty() ? 'Buku Tidak Tersedia' : 'Buku Tersedia',
+//         'data' => $buku,
+//     ]);
+// });
 
-Route::get('/buku/{idBuku}', function ($idBuku) {
-    $buku = Buku::findOrFail($idBuku);
+// Route::get('/buku/{idBuku}', function ($idBuku) {
+//     $buku = Buku::findOrFail($idBuku);
 
-    return response()->json([
-        'message' => 'IdBuku Berhasil Ditemukan',
-        'data' => $buku,
-    ]);
-});
+//     return response()->json([
+//         'message' => 'IdBuku Berhasil Ditemukan',
+//         'data' => $buku,
+//     ]);
+// });
 
 
-Route::post('/buku', function() {
+// Route::post('/buku', function() {
 
-    $bukuTerakhir = Buku::orderBy('idBuku', 'desc')->first();
+//     $bukuTerakhir = Buku::orderBy('idBuku', 'desc')->first();
 
-    if ($bukuTerakhir) {
-        $nomorTerakhir = (int) str_replace('BK', '', $bukuTerakhir->idBuku);
-        $nomor = $nomorTerakhir + 1;
-    } else {
-        $nomor = 1;
-    }
+//     if ($bukuTerakhir) {
+//         $nomorTerakhir = (int) str_replace('BK', '', $bukuTerakhir->idBuku);
+//         $nomor = $nomorTerakhir + 1;
+//     } else {
+//         $nomor = 1;
+//     }
 
-    $idBuku = 'BK' . str_pad($nomor, 3, '0', STR_PAD_LEFT);
+//     $idBuku = 'BK' . str_pad($nomor, 3, '0', STR_PAD_LEFT);
 
-    $buku = Buku::create([
-        'idBuku' => $idBuku,
-        'judul' => request()->input('judul'),
-        'authors' => request()->input('authors'),
-        'thnTerbit' => request()->input('thnTerbit'),
-        'stok' => request()->input('stok'),
-    ]);
+//     $buku = Buku::create([
+//         'idBuku' => $idBuku,
+//         'judul' => request()->input('judul'),
+//         'authors' => request()->input('authors'),
+//         'thnTerbit' => request()->input('thnTerbit'),
+//         'stok' => request()->input('stok'),
+//     ]);
 
-    return response()->json([
-        'message' => 'Buku Berhasil ditambahkan',
-        'data' => $buku
-    ], 201);
-});
+//     return response()->json([
+//         'message' => 'Buku Berhasil ditambahkan',
+//         'data' => $buku
+//     ], 201);
+// });
 
-Route::put('/buku/{idBuku}', function ($idBuku) {
-    $buku = Buku::findOrFail($idBuku);
-    $buku->update([
-        'idBuku' => request()->input('idBuku'), 
-        'judul' => request()->input('judul'),
-        'authors' => request()->input('authors'),
-        'thnTerbit' => request()->input('thnTerbit'),
-        'stok' => request()->input('stok'),
-    ]);
-    return response()->json([
-        'message' => 'Buku berhasil diubah',
-        'data' => $buku,
-    ], 200);
-});
+// Route::put('/buku/{idBuku}', function ($idBuku) {
+//     $buku = Buku::findOrFail($idBuku);
+//     $buku->update([
+//         'idBuku' => request()->input('idBuku'), 
+//         'judul' => request()->input('judul'),
+//         'authors' => request()->input('authors'),
+//         'thnTerbit' => request()->input('thnTerbit'),
+//         'stok' => request()->input('stok'),
+//     ]);
+//     return response()->json([
+//         'message' => 'Buku berhasil diubah',
+//         'data' => $buku,
+//     ], 200);
+// });
 
-Route::delete('/buku/{idBuku}', function ($idBuku) {
-    $buku = Buku::findOrFail($idBuku);
-    $idBuku = $buku->idBuku;
-    $judul = $buku->judul;
+// Route::delete('/buku/{idBuku}', function ($idBuku) {
+//     $buku = Buku::findOrFail($idBuku);
+//     $idBuku = $buku->idBuku;
+//     $judul = $buku->judul;
 
-    $buku->delete();
+//     $buku->delete();
 
-    return response()->json([
-        'message' => "Buku {$idBuku} - {$judul} berhasil dihapus",
-    ]);
-});
+//     return response()->json([
+//         'message' => "Buku {$idBuku} - {$judul} berhasil dihapus",
+//     ]);
+// });
