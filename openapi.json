@@ -1,0 +1,251 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Praktikum API - Buku Perpustakaan",
+    "description": "Dokumentasi API BREAD (Browse, Read, Edit, Add, Delete) untuk data Buku. Dilengkapi aturan validasi, status 201, 400, 404, dan 500.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Developer Praktikum",
+      "email": "admin@antoni-interoperabilitas.test"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://antoni-interoperabilitas.test/api",
+      "description": "Server lokal"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Buku",
+      "description": "Operasi BREAD pada data Buku"
+    }
+  ],
+  "paths": {
+    "/buku": {
+      "get": {
+        "tags": ["Buku"],
+        "summary": "B (Browse) - Menampilkan semua Buku",
+        "description": "Mengambil daftar seluruh buku yang ada di dalam database.",
+        "operationId": "getAllBuku",
+        "responses": {
+          "200": {
+            "description": "Daftar buku berhasil ditampilkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Buku" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "post": {
+        "tags": ["Buku"],
+        "summary": "A (Add) - Menambahkan buku baru",
+        "description": "Menambahkan data buku baru ke dalam database. Aturan validasi: idBuku dan judul wajib diisi. idBuku tidak boleh duplikat.",
+        "operationId": "createBuku",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BukuInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Buku berhasil ditambahkan (Created)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Buku berhasil ditambahkan" },
+                    "data": { "$ref": "#/components/schemas/Buku" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/buku/{idBuku}": {
+      "parameters": [
+        {
+          "name": "idBuku",
+          "in": "path",
+          "required": true,
+          "description": "ID buku",
+          "schema": { "type": "string" },
+          "example": "BK001"
+        }
+      ],
+      "get": {
+        "tags": ["Buku"],
+        "summary": "R (Read) - Menampilkan detail buku berdasarkan id",
+        "description": "Mengambil informasi detail dari satu buku spesifik berdasarkan ID Buku.",
+        "operationId": "getBukuById",
+        "responses": {
+          "200": {
+            "description": "Detail buku berhasil ditampilkan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Detail buku berhasil ditampilkan" },
+                    "data": { "$ref": "#/components/schemas/Buku" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "put": {
+        "tags": ["Buku"],
+        "summary": "E (Edit) - Mengubah buku berdasarkan id",
+        "description": "Memperbarui data buku yang sudah ada di database berdasarkan ID Buku.",
+        "operationId": "updateBuku",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BukuInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Buku berhasil diubah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Buku berhasil diubah" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "delete": {
+        "tags": ["Buku"],
+        "summary": "D (Delete) - Menghapus buku berdasarkan id",
+        "description": "Menghapus data buku secara permanen berdasarkan ID Buku.",
+        "operationId": "deleteBuku",
+        "responses": {
+          "200": {
+            "description": "Buku berhasil dihapus",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Buku berhasil dihapus" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Buku": {
+        "type": "object",
+        "properties": {
+          "idBuku": { "type": "string", "example": "BK001" },
+          "judul": { "type": "string", "example": "Life Is Short Make It Great" },
+          "authors": { "type": "string", "example": "Dale Carnegie & Associates" },
+          "thnTerbit": { "type": "integer", "example": 2013 },
+          "stok": { "type": "integer", "nullable": true, "example": 10 },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BukuInput": {
+        "type": "object",
+        "required": ["idBuku", "judul","authors","thnTerbit","stok"],
+        "properties": {
+          "idBuku": { "type": "string", "example": "BK001" },
+          "judul": { "type": "string", "example": "Life Is Short Make It Great" },
+          "authors": { "type": "string", "example": "Dale Carnegie & Associates" },
+          "thnTerbit": { "type": "integer", "example": 2013 },
+          "stok": { "type": "integer", "nullable": true, "example": 10 }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Request tidak valid (misal: ada field kosong atau ID Buku duplikat).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "Request tidak valid" },
+                "errors": {
+                  "type": "object",
+                  "example": {
+                    "idBuku": ["ID Buku wajib diisi.", "ID Buku sudah terdaftar."],
+                    "judul": ["Judul buku wajib diisi."]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Data tidak ditemukan.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "Data buku tidak ditemukan" }
+              }
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Kesalahan server internal (database down, error koding, dll).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string", "example": "Terjadi kesalahan pada server" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
